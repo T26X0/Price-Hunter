@@ -1,0 +1,10 @@
+target/
+.m2repo/
+.idea/
+node_modules
+outputs/
+scripts/
+*.iml
+.DS_Store
+.env
+*.log
