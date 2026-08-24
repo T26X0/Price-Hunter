@@ -1,6 +1,6 @@
-# Price Hunter backend
+# Price Hunter
 
-Minimal Java 21 / Spring Boot backend for a price-comparison service.
+Price-comparison service with a Java 21 / Spring Boot backend and a separate React / TypeScript frontend.
 
 ## Run locally
 
@@ -29,3 +29,7 @@ curl -X POST http://localhost:8080/api/products \
 List products: `curl http://localhost:8080/api/products`
 
 Run checks: `mvn test`
+
+## Frontend
+
+The React client lives in [`frontend`](frontend). Start the backend first, then follow [`frontend/README.md`](frontend/README.md). During local development Vite proxies `/api` requests to `http://localhost:8080`.
