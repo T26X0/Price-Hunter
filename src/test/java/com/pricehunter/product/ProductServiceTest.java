@@ -7,7 +7,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -53,7 +52,9 @@ class ProductServiceTest {
 
     @Test
     void listsProductsSortedByName() {
-        when(productRepository.findAll(any(Sort.class))).thenReturn(List.of(new Product("Phone", "SKU-1", null)));
+        ProductSummaryProjection projection = org.mockito.Mockito.mock(ProductSummaryProjection.class);
+        when(projection.getName()).thenReturn("Phone");
+        when(productRepository.findAllSummaries()).thenReturn(List.of(projection));
 
         assertThat(productService.findAll()).extracting(ProductResponse::name).containsExactly("Phone");
     }

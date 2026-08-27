@@ -2,7 +2,6 @@ package com.pricehunter.product;
 
 import com.pricehunter.shared.ConflictException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +28,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<ProductResponse> findAll() {
-        return productRepository.findAll(Sort.by(Sort.Direction.ASC, "name"))
+        return productRepository.findAllSummaries()
                 .stream()
                 .map(ProductResponse::from)
                 .toList();

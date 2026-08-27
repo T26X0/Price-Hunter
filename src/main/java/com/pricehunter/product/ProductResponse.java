@@ -14,4 +14,14 @@ public record ProductResponse(UUID id, String name, String sku, String descripti
                 product.getCreatedAt()
         );
     }
+
+    static ProductResponse from(ProductSummaryProjection product) {
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getSku(),
+                product.getDescription(),
+                product.getCreatedAt()
+        );
+    }
 }
