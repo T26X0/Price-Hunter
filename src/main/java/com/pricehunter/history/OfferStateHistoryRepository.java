@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/** Запросы интервальной истории предложения и точек графика цен. */
 public interface OfferStateHistoryRepository extends JpaRepository<OfferStateHistory, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

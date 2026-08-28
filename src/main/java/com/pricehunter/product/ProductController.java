@@ -15,16 +15,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
+/** REST-контроллер ручного создания и чтения моделей каталога. */
 public class ProductController {
 
     private final ProductService productService;
 
+    /** Создаёт модель после валидации тела запроса. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProductResponse create(@Valid @RequestBody ProductRequest request) {
         return productService.create(request);
     }
 
+    /** Возвращает компактный список моделей. */
     @GetMapping
     public List<ProductResponse> findAll() {
         return productService.findAll();

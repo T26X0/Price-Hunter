@@ -29,6 +29,7 @@ import java.util.UUID;
 @Table(name = "offer_terms")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Дополнительное условие предложения: подарок, рассрочка, кредит или скидка. */
 public class OfferTerm {
 
     @Id
@@ -86,6 +87,7 @@ public class OfferTerm {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** Создаёт активное коммерческое условие. */
     public OfferTerm(Offer offer, OfferTermType termType, String title, String description,
                      BigDecimal monetaryValue, BigDecimal annualRate, Short termMonths,
                      BigDecimal monthlyPayment, BigDecimal initialPayment, Instant validFrom,
@@ -105,10 +107,12 @@ public class OfferTerm {
         this.metadata = metadata == null ? new HashMap<>() : new HashMap<>(metadata);
     }
 
+    /** Помечает исчезнувшее условие неактивным без удаления истории. */
     public void deactivate() {
         this.active = false;
     }
 
+    /** Заполняет даты создания и изменения перед первой записью. */
     @PrePersist
     void assignTimestamps() {
         Instant now = Instant.now();
@@ -120,11 +124,13 @@ public class OfferTerm {
         }
     }
 
+    /** Обновляет техническую дату изменения. */
     @PreUpdate
     void assignUpdatedAt() {
         updatedAt = Instant.now();
     }
 
+    /** Преобразует пустую необязательную строку в {@code null}. */
     private static String trimToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

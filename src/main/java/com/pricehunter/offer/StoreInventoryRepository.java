@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.UUID;
 
+/** Запросы текущих остатков филиалов и блокировки строк при импорте. */
 public interface StoreInventoryRepository extends JpaRepository<StoreInventory, StoreInventoryId> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

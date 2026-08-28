@@ -11,10 +11,12 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
+/** Агрегирует детальную историю старше шести месяцев и безопасно удаляет исходные интервалы. */
 public class HistoryRetentionService {
 
     private final HistoryRetentionRepository retentionRepository;
 
+    /** Строит месячные агрегаты, разрезает пограничные интервалы и очищает старые детали. */
     @Transactional
     public RetentionResult aggregateAndPrune(Instant cutoff) {
         int offerMonths = retentionRepository.aggregateOfferMonths(cutoff);
@@ -27,6 +29,7 @@ public class HistoryRetentionService {
                 offerRows, inventoryRows);
     }
 
+    /** Вычисляет календарную границу хранения относительно переданных часов. */
     public Instant sixMonthCutoff(Clock clock) {
         return clock.instant()
                 .atZone(ZoneOffset.UTC)
@@ -36,6 +39,7 @@ public class HistoryRetentionService {
                 .toInstant();
     }
 
+    /** Итоговые количества агрегированных, разделённых и удалённых строк. */
     public record RetentionResult(
             int aggregatedOfferMonths,
             int aggregatedInventoryMonths,

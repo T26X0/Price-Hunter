@@ -23,6 +23,7 @@ import java.time.Instant;
 @Table(name = "store_inventories")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Текущее наличие конфигурации предложения в конкретном физическом филиале. */
 public class StoreInventory {
 
     @EmbeddedId
@@ -57,6 +58,7 @@ public class StoreInventory {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** Создаёт первую запись остатка. */
     public StoreInventory(Offer offer, Store storeLocation, AvailabilityStatus availabilityStatus,
                           Integer quantity, Instant checkedAt, String stateHash) {
         if (!offer.getMarket().equals(storeLocation.getMarket())) {
@@ -73,6 +75,7 @@ public class StoreInventory {
         this.updatedAt = Instant.now();
     }
 
+    /** Обновляет наличие, количество, момент проверки и отпечаток. */
     public void refresh(AvailabilityStatus status, Integer quantity, Instant checkedAt, String stateHash) {
         this.availabilityStatus = status;
         this.quantity = quantity;
@@ -80,6 +83,7 @@ public class StoreInventory {
         this.stateHash = stateHash;
     }
 
+    /** Обновляет техническую дату изменения. */
     @PreUpdate
     void assignUpdatedAt() {
         updatedAt = Instant.now();

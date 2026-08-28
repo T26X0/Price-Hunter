@@ -21,6 +21,7 @@ import java.util.UUID;
 @Table(name = "attribute_definitions")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Справочное описание характеристики: код, название, тип, единица и фильтруемость. */
 public class AttributeDefinition {
 
     @Id
@@ -46,6 +47,7 @@ public class AttributeDefinition {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    /** Создаёт единое определение характеристики для всех конфигураций каталога. */
     public AttributeDefinition(String code, String name, AttributeDataType dataType,
                                String unit, boolean filterable) {
         this.code = code.trim().toLowerCase(Locale.ROOT);
@@ -56,6 +58,7 @@ public class AttributeDefinition {
         this.createdAt = Instant.now();
     }
 
+    /** Заполняет дату создания перед первой записью. */
     @PrePersist
     void assignCreatedAt() {
         if (createdAt == null) {

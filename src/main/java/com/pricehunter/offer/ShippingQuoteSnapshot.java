@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+/** Входной расчёт доставки предложения в город назначения. */
 public record ShippingQuoteSnapshot(
         UUID offerId,
         UUID destinationCityId,
@@ -14,6 +15,7 @@ public record ShippingQuoteSnapshot(
         Short maxDeliveryDays,
         Instant observedAt
 ) {
+    /** Проверяет обязательные поля, неотрицательную цену и корректный диапазон сроков. */
     public ShippingQuoteSnapshot {
         if (offerId == null || destinationCityId == null || currency == null || currency.isBlank()
                 || observedAt == null) {

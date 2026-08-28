@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/** Запросы конфигураций товара и пакетное сопоставление канонических ключей. */
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, UUID> {
 
+    /** Находит точную конфигурацию внутри одной модели. */
     Optional<ProductVariant> findByProductModelIdAndCanonicalKey(UUID productModelId, String canonicalKey);
 
+    /** Одним запросом возвращает уже существующие конфигурации из входного набора ключей. */
     @Query("""
             select v.id as id,
                    v.productModel.id as productModelId,

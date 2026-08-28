@@ -10,10 +10,12 @@ import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
+/** Бизнес-операции ручного каталога: создание без дублей и чтение моделей. */
 public class ProductService {
 
     private final ProductRepository productRepository;
 
+    /** Нормализует SKU и создаёт товар, если такой ключ ещё не занят. */
     @Transactional
     public ProductResponse create(ProductRequest request) {
         String sku = request.sku().trim().toUpperCase(Locale.ROOT);
@@ -26,6 +28,7 @@ public class ProductService {
         return ProductResponse.from(productRepository.save(product));
     }
 
+    /** Возвращает DTO каталога через оптимизированную проекцию. */
     @Transactional(readOnly = true)
     public List<ProductResponse> findAll() {
         return productRepository.findAllSummaries()

@@ -13,6 +13,7 @@ import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import java.util.UUID;
 
+/** Запросы стоимости доставки и сравнения итоговой цены между городами. */
 public interface ShippingQuoteRepository extends JpaRepository<ShippingQuote, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

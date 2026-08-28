@@ -10,11 +10,14 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.UUID;
 
+/** Запросы городских рынков сети и целей для пакетного парсинга. */
 public interface ChainCityMarketRepository extends JpaRepository<ChainCityMarket, UUID> {
 
+    /** Находит уникальный рынок по сети, городу и каналу продаж. */
     Optional<ChainCityMarket> findByRetailChainIdAndCityIdAndSalesChannel(
             UUID retailChainId, UUID cityId, SalesChannel salesChannel);
 
+    /** Возвращает включённые цели парсинга без загрузки полных сущностей. */
     @Query("""
             select m.id as marketId,
                    chain.id as chainId,

@@ -3,6 +3,7 @@ package com.pricehunter.product;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/** Проверяемые входные данные API для ручного создания товара. */
 public record ProductRequest(
         @NotBlank @Size(max = 200) String name,
         @NotBlank @Size(max = 100) String sku,

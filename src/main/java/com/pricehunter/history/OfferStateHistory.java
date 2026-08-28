@@ -30,6 +30,7 @@ import java.util.Map;
 @Table(name = "offer_state_history")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Интервал времени, в котором цена, наличие и условия предложения оставались неизменными. */
 public class OfferStateHistory {
 
     @Id
@@ -90,6 +91,7 @@ public class OfferStateHistory {
         this.validFrom = validFrom;
     }
 
+    /** Закрывает текущий интервал перед записью нового состояния. */
     public void closeAt(Instant timestamp) {
         if (!timestamp.isAfter(validFrom)) {
             throw new IllegalArgumentException("History interval must have a positive duration");

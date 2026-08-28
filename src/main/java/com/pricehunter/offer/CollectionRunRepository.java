@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.Instant;
 import java.util.UUID;
 
+/** Хранилище общих запусков сбора и запрос их последней статистики. */
 public interface CollectionRunRepository extends JpaRepository<CollectionRun, UUID> {
 
     Slice<CollectionRun> findByMarketIdAndStartedAtBetweenOrderByStartedAtDesc(

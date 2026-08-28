@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+/** Хранилище дополнительных условий предложения и их пакетного сопоставления. */
 public interface OfferTermRepository extends JpaRepository<OfferTerm, UUID> {
 
     @Query("""

@@ -15,12 +15,14 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+/** Идемпотентно сохраняет текущий расчёт доставки предложения в город. */
 public class ShippingQuoteIngestionService {
 
     private final ShippingQuoteRepository shippingQuoteRepository;
     private final OfferRepository offerRepository;
     private final CityRepository cityRepository;
 
+    /** Создаёт или обновляет расчёт, пропуская запись при неизменном отпечатке. */
     @Transactional
     public ShippingQuoteUpsertResult ingest(ShippingQuoteSnapshot snapshot) {
         String stateHash = stateHash(snapshot);
@@ -43,6 +45,7 @@ public class ShippingQuoteIngestionService {
         return new ShippingQuoteUpsertResult(created.getId(), true, true);
     }
 
+    /** Вычисляет отпечаток значимых полей доставки. */
     private static String stateHash(ShippingQuoteSnapshot snapshot) {
         String source = String.join("|",
                 Boolean.toString(snapshot.available()),
@@ -58,6 +61,7 @@ public class ShippingQuoteIngestionService {
         }
     }
 
+    /** Канонически форматирует денежное значение для отпечатка. */
     private static String amount(BigDecimal value) {
         return value == null ? "" : value.stripTrailingZeros().toPlainString();
     }

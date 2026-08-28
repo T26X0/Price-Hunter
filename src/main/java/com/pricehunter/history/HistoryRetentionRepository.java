@@ -9,10 +9,12 @@ import java.time.Instant;
 
 @Repository
 @RequiredArgsConstructor
+/** Низкоуровневые SQL-операции агрегации и очистки больших объёмов истории. */
 public class HistoryRetentionRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    /** Строит или обновляет месячную статистику цен до границы хранения. */
     public int aggregateOfferMonths(Instant cutoff) {
         return jdbcTemplate.update("""
                 INSERT INTO offer_monthly_stats (
@@ -80,6 +82,7 @@ public class HistoryRetentionRepository {
                 timestamp(cutoff), timestamp(cutoff));
     }
 
+    /** Строит или обновляет месячную статистику остатков до границы хранения. */
     public int aggregateInventoryMonths(Instant cutoff) {
         return jdbcTemplate.update("""
                 INSERT INTO store_inventory_monthly_stats (
@@ -128,12 +131,14 @@ public class HistoryRetentionRepository {
                 timestamp(cutoff), timestamp(cutoff));
     }
 
+    /** Удаляет закрытые интервалы цен, полностью лежащие до границы. */
     public int deleteClosedOfferHistory(Instant cutoff) {
         return jdbcTemplate.update(
                 "DELETE FROM offer_state_history WHERE valid_to IS NOT NULL AND valid_to <= ?",
                 timestamp(cutoff));
     }
 
+    /** Делит пересекающие границу интервалы цен без разрыва графика. */
     public int splitOfferIntervalsAt(Instant cutoff) {
         return jdbcTemplate.update("""
                 WITH spanning AS (
@@ -163,12 +168,14 @@ public class HistoryRetentionRepository {
                 """, timestamp(cutoff), timestamp(cutoff), timestamp(cutoff), timestamp(cutoff));
     }
 
+    /** Удаляет закрытые интервалы остатков до границы хранения. */
     public int deleteClosedInventoryHistory(Instant cutoff) {
         return jdbcTemplate.update(
                 "DELETE FROM store_inventory_history WHERE valid_to IS NOT NULL AND valid_to <= ?",
                 timestamp(cutoff));
     }
 
+    /** Делит пересекающие границу интервалы остатков. */
     public int splitInventoryIntervalsAt(Instant cutoff) {
         return jdbcTemplate.update("""
                 WITH spanning AS (
@@ -195,6 +202,7 @@ public class HistoryRetentionRepository {
                 """, timestamp(cutoff), timestamp(cutoff), timestamp(cutoff), timestamp(cutoff));
     }
 
+    /** Преобразует момент времени в JDBC-тип параметра SQL. */
     private static Timestamp timestamp(Instant instant) {
         return Timestamp.from(instant);
     }

@@ -2,6 +2,7 @@ package com.pricehunter.offer;
 
 import com.pricehunter.product.ProductVariant;
 import com.pricehunter.retail.ChainCityMarket;
+import com.pricehunter.store.Store;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -28,6 +29,7 @@ import java.util.UUID;
 @Table(name = "offers")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Текущее предложение одной конфигурации на уровне города или конкретного филиала. */
 public class Offer {
 
     @Id
@@ -41,6 +43,10 @@ public class Offer {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_variant_id", nullable = false)
     private ProductVariant productVariant;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_location_id")
+    private Store storeLocation;
 
     @Column(name = "external_offer_id", length = 300)
     private String externalOfferId;
@@ -113,12 +119,14 @@ public class Offer {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public Offer(ChainCityMarket market, ProductVariant productVariant, String externalOfferId,
+    /** Создаёт первое состояние предложения. */
+    public Offer(ChainCityMarket market, Store storeLocation, ProductVariant productVariant, String externalOfferId,
                  String offerKey, ConditionType conditionType, BigDecimal regularPrice,
                  BigDecimal salePrice, BigDecimal conditionalPrice, String currency,
                  AvailabilityStatus availabilityStatus, Integer quantity, String productUrl,
                  Instant checkedAt, String stateHash) {
         this.market = market;
+        this.storeLocation = storeLocation;
         this.productVariant = productVariant;
         this.externalOfferId = trimToNull(externalOfferId);
         this.offerKey = offerKey.trim();
@@ -138,6 +146,7 @@ public class Offer {
         this.updatedAt = now;
     }
 
+    /** Обновляет цены, наличие, ссылку и служебные даты после нового наблюдения. */
     public void refresh(BigDecimal regularPrice, BigDecimal salePrice, BigDecimal conditionalPrice,
                         AvailabilityStatus availabilityStatus, Integer quantity, String productUrl,
                         Instant checkedAt, Instant freshUntil, String stateHash) {
@@ -156,6 +165,7 @@ public class Offer {
         this.active = true;
     }
 
+    /** Заполняет даты создания и изменения перед первой записью. */
     @PrePersist
     void assignTimestamps() {
         Instant now = Instant.now();
@@ -167,11 +177,13 @@ public class Offer {
         }
     }
 
+    /** Обновляет техническую дату изменения. */
     @PreUpdate
     void assignUpdatedAt() {
         updatedAt = Instant.now();
     }
 
+    /** Преобразует пустую необязательную строку в {@code null}. */
     private static String trimToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

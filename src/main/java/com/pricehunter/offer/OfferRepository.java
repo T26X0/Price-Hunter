@@ -16,18 +16,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/** Оптимизированные запросы текущих предложений, блокировок импорта и карточек сравнения. */
 public interface OfferRepository extends JpaRepository<Offer, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select o from Offer o where o.market.id = :marketId and o.externalOfferId = :externalOfferId")
+    @Query("""
+            select o from Offer o
+             where o.market.id = :marketId
+               and ((:storeLocationId is null and o.storeLocation is null)
+                    or o.storeLocation.id = :storeLocationId)
+               and o.externalOfferId = :externalOfferId
+            """)
     Optional<Offer> findForUpdateByExternalId(
             @Param("marketId") UUID marketId,
+            @Param("storeLocationId") UUID storeLocationId,
             @Param("externalOfferId") String externalOfferId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select o from Offer o where o.market.id = :marketId and o.offerKey = :offerKey")
+    @Query("""
+            select o from Offer o
+             where o.market.id = :marketId
+               and ((:storeLocationId is null and o.storeLocation is null)
+                    or o.storeLocation.id = :storeLocationId)
+               and o.offerKey = :offerKey
+            """)
     Optional<Offer> findForUpdateByOfferKey(
             @Param("marketId") UUID marketId,
+            @Param("storeLocationId") UUID storeLocationId,
             @Param("offerKey") String offerKey);
 
     @Query("""
@@ -38,10 +53,13 @@ public interface OfferRepository extends JpaRepository<Offer, UUID> {
                    o.lastCheckedAt as lastCheckedAt
               from Offer o
              where o.market.id = :marketId
+               and ((:storeLocationId is null and o.storeLocation is null)
+                    or o.storeLocation.id = :storeLocationId)
                and o.externalOfferId in :externalOfferIds
             """)
     List<OfferIdentityProjection> findExistingIdentities(
             @Param("marketId") UUID marketId,
+            @Param("storeLocationId") UUID storeLocationId,
             @Param("externalOfferIds") Collection<String> externalOfferIds);
 
     @Query("""
@@ -51,6 +69,9 @@ public interface OfferRepository extends JpaRepository<Offer, UUID> {
                    chain.name as chainName,
                    city.id as cityId,
                    city.name as cityName,
+                   store.id as storeLocationId,
+                   store.name as storeLocationName,
+                   store.address as storeLocationAddress,
                    product.id as productModelId,
                    product.name as productName,
                    variant.id as variantId,
@@ -68,6 +89,7 @@ public interface OfferRepository extends JpaRepository<Offer, UUID> {
               join o.market market
               join market.retailChain chain
               join market.city city
+              left join o.storeLocation store
               join o.productVariant variant
               join variant.productModel product
              where o.id = :offerId
@@ -82,6 +104,9 @@ public interface OfferRepository extends JpaRepository<Offer, UUID> {
                    chain.name as chainName,
                    city.id as cityId,
                    city.name as cityName,
+                   store.id as storeLocationId,
+                   store.name as storeLocationName,
+                   store.address as storeLocationAddress,
                    product.id as productModelId,
                    product.name as productName,
                    variant.id as variantId,
@@ -99,6 +124,7 @@ public interface OfferRepository extends JpaRepository<Offer, UUID> {
               join o.market market
               join market.retailChain chain
               join market.city city
+              left join o.storeLocation store
               join o.productVariant variant
               join variant.productModel product
              where variant.id = :variantId
@@ -106,7 +132,7 @@ public interface OfferRepository extends JpaRepository<Offer, UUID> {
                and o.active = true
                and o.availabilityStatus in (com.pricehunter.offer.AvailabilityStatus.IN_STOCK,
                                             com.pricehunter.offer.AvailabilityStatus.PREORDER)
-             order by coalesce(o.salePrice, o.regularPrice) asc, o.id
+             order by coalesce(o.salePrice, o.regularPrice) asc, store.id, o.id
             """)
     Slice<OfferCardProjection> findBestLocalOffers(
             @Param("variantId") UUID variantId,

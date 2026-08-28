@@ -23,6 +23,7 @@ import java.util.UUID;
 @Table(name = "retail_chains")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Торговая сеть как единый бренд, объединяющий рынки разных городов и филиалы. */
 public class RetailChain {
 
     @Id
@@ -51,6 +52,7 @@ public class RetailChain {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** Создаёт сеть с уникальным кодом, сайтом и настройкой парсинга. */
     public RetailChain(String name, String code, String websiteUrl, ParserType parserType, boolean parserEnabled) {
         this.name = name.trim();
         this.code = code.trim().toUpperCase(Locale.ROOT);
@@ -62,6 +64,7 @@ public class RetailChain {
         this.updatedAt = now;
     }
 
+    /** Заполняет даты создания и изменения перед первой записью. */
     @PrePersist
     void assignTimestamps() {
         Instant now = Instant.now();
@@ -73,11 +76,13 @@ public class RetailChain {
         }
     }
 
+    /** Обновляет техническую дату изменения. */
     @PreUpdate
     void assignUpdatedAt() {
         updatedAt = Instant.now();
     }
 
+    /** Преобразует пустую необязательную строку в {@code null}. */
     private static String trimToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

@@ -19,6 +19,8 @@ import com.pricehunter.retail.RetailChain;
 import com.pricehunter.retail.RetailChainRepository;
 import com.pricehunter.retail.SalesChannel;
 import com.pricehunter.store.ParserType;
+import com.pricehunter.store.Store;
+import com.pricehunter.store.StoreRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,7 @@ class DatabaseArchitectureIntegrationTest {
     @Autowired OfferStateHistoryRepository historyRepository;
     @Autowired OfferIngestionService ingestionService;
     @Autowired HistoryRetentionService retentionService;
+    @Autowired StoreRepository storeRepository;
     @Autowired JdbcTemplate jdbcTemplate;
 
     @Test
@@ -91,12 +94,32 @@ class DatabaseArchitectureIntegrationTest {
         assertThat(jdbcTemplate.queryForObject(
                 "select count(*) from offer_monthly_stats where offer_id = ?",
                 Long.class, created.offerId())).isEqualTo(3L);
+
+        Store radishcheva = storeRepository.save(new Store(
+                chain, market, "941-radishcheva", "941 Радищева", "ул. Радищева, 1", "https://941.example"));
+        Store malysheva = storeRepository.save(new Store(
+                chain, market, "941-malysheva", "941 Малышева", "ул. Малышева, 73", "https://941.example"));
+        Instant branchCheck = Instant.parse("2025-06-01T00:00:00Z");
+        ingestionService.ingest(snapshot(market, radishcheva, variant, branchCheck, "105000"), null);
+        ingestionService.ingest(snapshot(market, malysheva, variant, branchCheck, "108000"), null);
+
+        var localOffers = offerRepository.findBestLocalOffers(
+                variant.getId(), city.getId(), PageRequest.of(0, 20)).getContent();
+        assertThat(localOffers).hasSize(3);
+        assertThat(localOffers.getFirst().getStoreLocationId()).isEqualTo(radishcheva.getId());
+        assertThat(localOffers.getFirst().getStoreLocationName()).isEqualTo("941 Радищева");
     }
 
     private static OfferSnapshot snapshot(ChainCityMarket market, ProductVariant variant,
                                           Instant observedAt, String price) {
+        return snapshot(market, null, variant, observedAt, price);
+    }
+
+    private static OfferSnapshot snapshot(ChainCityMarket market, Store store, ProductVariant variant,
+                                          Instant observedAt, String price) {
         return new OfferSnapshot(
-                market.getId(), variant.getId(), "941-iphone-16-pro-256-black-new",
+                market.getId(), store == null ? null : store.getId(), variant.getId(),
+                "941-iphone-16-pro-256-black-new",
                 "variant:new", ConditionType.NEW, new BigDecimal(price), null, null,
                 "RUB", AvailabilityStatus.IN_STOCK, 10,
                 "https://941.example/ekb/iphone-16-pro-256-black",

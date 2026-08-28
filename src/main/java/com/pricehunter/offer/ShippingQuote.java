@@ -24,6 +24,7 @@ import java.util.UUID;
 @Table(name = "shipping_quotes")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Текущая доступность, цена и срок доставки предложения в город назначения. */
 public class ShippingQuote {
 
     @Id
@@ -65,6 +66,7 @@ public class ShippingQuote {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** Создаёт первый расчёт доставки. */
     public ShippingQuote(Offer offer, City destinationCity, boolean available,
                          BigDecimal deliveryPrice, String currency, Short minDeliveryDays,
                          Short maxDeliveryDays, Instant checkedAt, String stateHash) {
@@ -73,6 +75,7 @@ public class ShippingQuote {
         refresh(available, deliveryPrice, currency, minDeliveryDays, maxDeliveryDays, checkedAt, stateHash);
     }
 
+    /** Обновляет расчёт доставки после нового запроса источника. */
     public void refresh(boolean available, BigDecimal deliveryPrice, String currency,
                         Short minDeliveryDays, Short maxDeliveryDays, Instant checkedAt,
                         String stateHash) {
@@ -85,6 +88,7 @@ public class ShippingQuote {
         this.stateHash = stateHash;
     }
 
+    /** Заполняет даты создания и изменения перед первой записью. */
     @PrePersist
     void assignTimestamps() {
         Instant now = Instant.now();
@@ -96,6 +100,7 @@ public class ShippingQuote {
         }
     }
 
+    /** Обновляет техническую дату изменения. */
     @PreUpdate
     void assignUpdatedAt() {
         updatedAt = Instant.now();

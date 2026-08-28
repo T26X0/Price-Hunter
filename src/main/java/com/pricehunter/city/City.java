@@ -20,6 +20,7 @@ import java.util.UUID;
 @Table(name = "cities")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Канонический город, общий для сетей, филиалов, рынков и расчётов доставки. */
 public class City {
 
     @Id
@@ -44,10 +45,12 @@ public class City {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** Создаёт город с российскими значениями страны и часового пояса по умолчанию. */
     public City(String name) {
         this(name, "RU", null);
     }
 
+    /** Создаёт город с явной страной и часовым поясом. */
     public City(String name, String countryCode, String timezone) {
         this.name = name.trim();
         this.normalizedName = normalize(name);
@@ -58,6 +61,7 @@ public class City {
         this.updatedAt = now;
     }
 
+    /** Заполняет даты создания и изменения перед первой записью. */
     @PrePersist
     void assignCreatedAt() {
         normalizedName = normalize(name);
@@ -69,12 +73,14 @@ public class City {
         }
     }
 
+    /** Обновляет техническую дату изменения. */
     @PreUpdate
     void assignUpdatedAt() {
         normalizedName = normalize(name);
         updatedAt = Instant.now();
     }
 
+    /** Нормализует название для регистронезависимого поиска дублей. */
     private static String normalize(String value) {
         return value.trim().toLowerCase(Locale.ROOT);
     }

@@ -4,6 +4,7 @@ import com.pricehunter.history.OfferStateHistory;
 import com.pricehunter.history.OfferStateHistoryRepository;
 import com.pricehunter.product.ProductVariantRepository;
 import com.pricehunter.retail.ChainCityMarketRepository;
+import com.pricehunter.store.StoreRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,7 @@ class OfferIngestionServiceTest {
     @Mock OfferStateHistoryRepository historyRepository;
     @Mock ChainCityMarketRepository marketRepository;
     @Mock ProductVariantRepository variantRepository;
+    @Mock StoreRepository storeRepository;
     @Mock OfferStateHasher stateHasher;
     @Mock Offer offer;
     @Mock OfferStateHistory openHistory;
@@ -38,7 +40,7 @@ class OfferIngestionServiceTest {
     @BeforeEach
     void setUp() {
         service = new OfferIngestionService(offerRepository, historyRepository,
-                marketRepository, variantRepository, stateHasher);
+                marketRepository, variantRepository, storeRepository, stateHasher);
     }
 
     @Test
@@ -46,7 +48,8 @@ class OfferIngestionServiceTest {
         OfferSnapshot snapshot = snapshot();
         UUID offerId = UUID.randomUUID();
         when(stateHasher.hash(snapshot)).thenReturn("same-hash");
-        when(offerRepository.findForUpdateByExternalId(snapshot.marketId(), snapshot.externalOfferId()))
+        when(offerRepository.findForUpdateByExternalId(
+                snapshot.marketId(), snapshot.storeLocationId(), snapshot.externalOfferId()))
                 .thenReturn(Optional.of(offer));
         when(offer.getId()).thenReturn(offerId);
         when(offer.getStateHash()).thenReturn("same-hash");
@@ -66,7 +69,8 @@ class OfferIngestionServiceTest {
         OfferSnapshot snapshot = snapshot();
         UUID offerId = UUID.randomUUID();
         when(stateHasher.hash(snapshot)).thenReturn("new-hash");
-        when(offerRepository.findForUpdateByExternalId(snapshot.marketId(), snapshot.externalOfferId()))
+        when(offerRepository.findForUpdateByExternalId(
+                snapshot.marketId(), snapshot.storeLocationId(), snapshot.externalOfferId()))
                 .thenReturn(Optional.of(offer));
         when(offer.getId()).thenReturn(offerId);
         when(offer.getStateHash()).thenReturn("old-hash");
@@ -81,7 +85,7 @@ class OfferIngestionServiceTest {
 
     private static OfferSnapshot snapshot() {
         return new OfferSnapshot(
-                UUID.randomUUID(), UUID.randomUUID(), "external-1", "variant:new",
+                UUID.randomUUID(), null, UUID.randomUUID(), "external-1", "variant:new",
                 ConditionType.NEW, new BigDecimal("115000"), null, null, "RUB",
                 AvailabilityStatus.IN_STOCK, 5, "https://example.test/product",
                 Instant.parse("2026-08-27T00:00:00Z"),

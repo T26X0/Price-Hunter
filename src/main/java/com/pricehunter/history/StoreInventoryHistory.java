@@ -25,6 +25,7 @@ import java.time.Instant;
 @Table(name = "store_inventory_history")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Интервал времени, в котором наличие товара в филиале не менялось. */
 public class StoreInventoryHistory {
 
     @Id
@@ -70,6 +71,7 @@ public class StoreInventoryHistory {
         this.validFrom = validFrom;
     }
 
+    /** Закрывает интервал перед записью изменившегося остатка. */
     public void closeAt(Instant timestamp) {
         if (!timestamp.isAfter(validFrom)) {
             throw new IllegalArgumentException("History interval must have a positive duration");

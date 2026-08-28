@@ -23,6 +23,7 @@ import java.util.UUID;
 @Table(name = "store_locations")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Физический филиал торговой сети в конкретном городском рынке. */
 public class Store {
 
     @Id
@@ -64,6 +65,7 @@ public class Store {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** Создаёт филиал и проверяет, что он принадлежит той же сети, что и рынок. */
     public Store(RetailChain retailChain, ChainCityMarket market, String externalStoreId,
                  String name, String address, String websiteUrl) {
         if (!retailChain.equals(market.getRetailChain())) {
@@ -80,6 +82,7 @@ public class Store {
         this.updatedAt = now;
     }
 
+    /** Заполняет даты создания и изменения перед первой записью. */
     @PrePersist
     void assignCreatedAt() {
         if (createdAt == null) {

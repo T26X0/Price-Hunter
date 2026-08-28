@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/** Запросы интервальной истории наличия товара в филиалах. */
 public interface StoreInventoryHistoryRepository extends JpaRepository<StoreInventoryHistory, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

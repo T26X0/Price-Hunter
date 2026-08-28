@@ -23,6 +23,7 @@ import java.util.UUID;
 @Table(name = "collection_runs")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Один общий проход сбора цен и остатков по городскому рынку сети. */
 public class CollectionRun {
 
     @Id
@@ -55,12 +56,14 @@ public class CollectionRun {
     @Column(name = "error_summary", length = 2000)
     private String errorSummary;
 
+    /** Создаёт выполняющийся запуск для рынка. */
     public CollectionRun(ChainCityMarket market, Instant startedAt) {
         this.market = market;
         this.startedAt = startedAt;
         this.status = CollectionRunStatus.RUNNING;
     }
 
+    /** Завершает запуск и сохраняет агрегированные счётчики. */
     public void complete(CollectionRunStatus status, int foundCount, int changedCount,
                          int errorCount, String errorSummary, Instant completedAt) {
         if (status == CollectionRunStatus.RUNNING) {

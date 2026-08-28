@@ -38,7 +38,7 @@ class OfferStateHasherTest {
 
     private static OfferSnapshot snapshot(BigDecimal price, List<Map<String, Object>> terms) {
         return new OfferSnapshot(
-                UUID.randomUUID(), UUID.randomUUID(), "external-1", "variant:new",
+                UUID.randomUUID(), null, UUID.randomUUID(), "external-1", "variant:new",
                 ConditionType.NEW, price, null, null, "RUB",
                 AvailabilityStatus.IN_STOCK, 5, "https://example.test/product",
                 Instant.parse("2026-08-27T00:00:00Z"), null, terms);

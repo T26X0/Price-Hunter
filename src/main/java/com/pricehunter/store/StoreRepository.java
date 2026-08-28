@@ -10,10 +10,13 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.UUID;
 
+/** Оптимизированные запросы физических филиалов для импорта и выдачи. */
 public interface StoreRepository extends JpaRepository<Store, UUID> {
 
+    /** Находит филиал сети по стабильному внешнему идентификатору. */
     Optional<Store> findByRetailChainIdAndExternalStoreId(UUID retailChainId, String externalStoreId);
 
+    /** Возвращает активные филиалы рынка узкой проекцией и ограниченной порцией. */
     @Query("""
             select s.id as id,
                    s.externalStoreId as externalStoreId,

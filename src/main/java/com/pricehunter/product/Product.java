@@ -18,6 +18,7 @@ import java.util.UUID;
 @Table(name = "product_models")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Единая модель товара, независимая от города, магазина, характеристик и цены. */
 public class Product {
 
     @Id
@@ -45,10 +46,12 @@ public class Product {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** Создаёт простую модель для ручного REST API. */
     public Product(String name, String sku, String description) {
         this(null, name, sku, null, description);
     }
 
+    /** Создаёт полную каноническую модель с брендом и категорией. */
     public Product(String brand, String name, String sku, String categoryCode, String description) {
         this.brand = trimToNull(brand);
         this.name = name;
@@ -60,6 +63,7 @@ public class Product {
         this.updatedAt = now;
     }
 
+    /** Заполняет технические даты перед первой записью. */
     @PrePersist
     void assignCreatedAt() {
         if (createdAt == null) {
@@ -70,6 +74,7 @@ public class Product {
         }
     }
 
+    /** Преобразует пустую необязательную строку в {@code null}. */
     private static String trimToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

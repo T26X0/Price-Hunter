@@ -25,6 +25,7 @@ import java.util.UUID;
 @Table(name = "chain_city_markets")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Коммерческое присутствие одной сети в одном городе и одном канале продаж. */
 public class ChainCityMarket {
 
     @Id
@@ -58,6 +59,7 @@ public class ChainCityMarket {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** Создаёт городской рынок сети с внешним ключом города и URL витрины. */
     public ChainCityMarket(RetailChain retailChain, City city, SalesChannel salesChannel,
                            String externalMarketId, String sourceBaseUrl, boolean parserEnabled) {
         this.retailChain = retailChain;
@@ -71,6 +73,7 @@ public class ChainCityMarket {
         this.updatedAt = now;
     }
 
+    /** Заполняет даты создания и изменения перед первой записью. */
     @PrePersist
     void assignTimestamps() {
         Instant now = Instant.now();
@@ -82,11 +85,13 @@ public class ChainCityMarket {
         }
     }
 
+    /** Обновляет техническую дату изменения. */
     @PreUpdate
     void assignUpdatedAt() {
         updatedAt = Instant.now();
     }
 
+    /** Преобразует пустую необязательную строку в {@code null}. */
     private static String trimToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

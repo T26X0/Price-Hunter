@@ -15,6 +15,7 @@ import java.util.HexFormat;
 
 @Service
 @RequiredArgsConstructor
+/** Идемпотентно обновляет текущий остаток филиала и интервальную историю наличия. */
 public class StoreInventoryIngestionService {
 
     private final StoreInventoryRepository inventoryRepository;
@@ -22,6 +23,7 @@ public class StoreInventoryIngestionService {
     private final OfferRepository offerRepository;
     private final StoreRepository storeRepository;
 
+    /** @return {@code true}, если состояние остатка действительно изменилось */
     @Transactional
     public boolean ingest(InventorySnapshot snapshot, CollectionRun sourceRun) {
         String stateHash = hash(snapshot);
@@ -52,6 +54,7 @@ public class StoreInventoryIngestionService {
         return true;
     }
 
+    /** Вычисляет отпечаток наличия и количества. */
     private static String hash(InventorySnapshot snapshot) {
         String source = snapshot.availabilityStatus().name() + "|"
                 + (snapshot.quantity() == null ? "" : snapshot.quantity());

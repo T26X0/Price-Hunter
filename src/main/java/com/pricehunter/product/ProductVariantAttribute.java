@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 @Table(name = "product_variant_attributes")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Значение одной характеристики конкретной конфигурации товара. */
 public class ProductVariantAttribute {
 
     @EmbeddedId
@@ -45,9 +46,13 @@ public class ProductVariantAttribute {
     @Column(name = "boolean_value")
     private Boolean booleanValue;
 
+    /** Сохраняет нормализованное, отображаемое и типизированное значение характеристики. */
     public ProductVariantAttribute(ProductVariant productVariant, AttributeDefinition attributeDefinition,
                                    String normalizedValue, String displayValue,
                                    BigDecimal numericValue, Boolean booleanValue) {
+        if (productVariant.getId() != null && attributeDefinition.getId() != null) {
+            this.id = new ProductVariantAttributeId(productVariant.getId(), attributeDefinition.getId());
+        }
         this.productVariant = productVariant;
         this.attributeDefinition = attributeDefinition;
         this.normalizedValue = normalizedValue.trim();

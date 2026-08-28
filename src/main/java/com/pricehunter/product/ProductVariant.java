@@ -22,6 +22,7 @@ import java.util.UUID;
 @Table(name = "product_variants")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+/** Конкретная фильтруемая конфигурация модели, например iPhone 16 Pro 256 GB Black. */
 public class ProductVariant {
 
     @Id
@@ -47,6 +48,7 @@ public class ProductVariant {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** Создаёт конфигурацию с каноническим ключом и необязательным артикулом производителя. */
     public ProductVariant(Product productModel, String canonicalKey, String manufacturerSku, String displayName) {
         this.productModel = productModel;
         this.canonicalKey = canonicalKey.trim();
@@ -57,6 +59,7 @@ public class ProductVariant {
         this.updatedAt = now;
     }
 
+    /** Заполняет даты создания и изменения перед первой записью. */
     @PrePersist
     void assignTimestamps() {
         Instant now = Instant.now();
@@ -68,11 +71,13 @@ public class ProductVariant {
         }
     }
 
+    /** Обновляет техническую дату изменения. */
     @PreUpdate
     void assignUpdatedAt() {
         updatedAt = Instant.now();
     }
 
+    /** Преобразует пустую необязательную строку в {@code null}. */
     private static String trimToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

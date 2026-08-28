@@ -14,6 +14,7 @@ import java.util.UUID;
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+/** Составной ключ остатка: предложение плюс физический филиал. */
 public class StoreInventoryId implements Serializable {
 
     @Column(name = "offer_id")

@@ -16,11 +16,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 @Component
+/** Вычисляет стабильный отпечаток всех полей предложения, влияющих на карточку и график. */
 public class OfferStateHasher {
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
 
+    /** @return SHA-256 нормализованного состояния предложения */
     public String hash(OfferSnapshot snapshot) {
         List<String> normalizedTerms = new ArrayList<>();
         for (Map<String, Object> term : snapshot.terms()) {
@@ -49,6 +51,7 @@ public class OfferStateHasher {
         }
     }
 
+    /** Канонически форматирует денежное значение для хеширования. */
     private static String amount(BigDecimal value) {
         return value == null ? "" : value.stripTrailingZeros().toPlainString();
     }

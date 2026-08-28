@@ -1,5 +1,6 @@
 package com.pricehunter.offer;
 
+/** Вид дополнительного коммерческого условия предложения. */
 public enum OfferTermType {
     GIFT,
     DISCOUNT,

@@ -15,3 +15,9 @@ spring:
 server:
   error:
     include-message: never
+
+pricehunter:
+  parser:
+    scheduling:
+      enabled: ${PARSER_SCHEDULING_ENABLED:false}
+      poll-cron: ${PARSER_POLL_CRON:0 15 * * * *}

@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/** Полное наблюдаемое состояние предложения для идемпотентного обновления. */
 public record OfferSnapshot(
         UUID marketId,
+        UUID storeLocationId,
         UUID productVariantId,
         String externalOfferId,
         String offerKey,
@@ -23,6 +25,7 @@ public record OfferSnapshot(
         Instant freshUntil,
         List<Map<String, Object>> terms
 ) {
+    /** Проверяет идентичность, состояние, цены и количество до начала транзакции импорта. */
     public OfferSnapshot {
         if (marketId == null || productVariantId == null || offerKey == null || offerKey.isBlank()
                 || conditionType == null || currency == null || currency.isBlank()
