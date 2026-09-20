@@ -7,6 +7,9 @@ scripts/
 *.iml
 .DS_Store
 .env
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 *.log
 frontend/node_modules/
 frontend/dist/

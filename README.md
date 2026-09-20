@@ -16,6 +16,8 @@ Price Hunter — backend сервиса сравнения цен. Он хран
 - Maven;
 - PostgreSQL 15+.
 
+Для production в Cloudflare дополнительно нужны Node.js, Docker Desktop и тариф Workers Paid. Полная инструкция находится в [`DEPLOYMENT_CLOUDFLARE.md`](DEPLOYMENT_CLOUDFLARE.md).
+
 Для контейнерного PostgreSQL можно использовать `docker compose up -d postgres`. На macOS также подойдёт локально установленный PostgreSQL.
 
 По умолчанию приложение подключается к:
@@ -77,11 +79,14 @@ Admin API нужен для настройки источников и ручн�
 | Запустить сохранённый источник | `POST /api/admin/parser-sources/{sourceId}/runs` |
 | Прочитать job | `GET /api/admin/parser-jobs/{jobId}` |
 | История job источника | `GET /api/admin/parser-sources/{sourceId}/jobs` |
+| Плановый проход просроченных источников | `POST /api/admin/parser-scheduler/run` |
 | Очередь ручной проверки | `GET /api/admin/review-candidates?status=PENDING` |
 | Карточка кандидата | `GET /api/admin/review-candidates/{candidateId}` |
 | Применить решение | `POST /api/admin/review-candidates/{candidateId}/resolve` |
 
 Ручной запуск не принимает URL: адрес берётся только из заранее сохранённого `ParserSource`. Это не позволяет подменить домен через HTTP-запрос.
+
+В production маршруты `/api/admin/**` закрывает Cloudflare Worker и требует `Authorization: Bearer ...`; публичные каталожные маршруты остаются открытыми для frontend.
 
 Пример запуска:
 

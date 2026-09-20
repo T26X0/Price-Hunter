@@ -1,0 +1,17 @@
+{
+  "name": "price-hunter-cloudflare",
+  "private": true,
+  "scripts": {
+    "cf:check": "tsc --noEmit && wrangler deploy --dry-run",
+    "cf:deploy": "wrangler deploy",
+    "cf:types": "wrangler types"
+  },
+  "dependencies": {
+    "@cloudflare/containers": "0.3.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260920.1",
+    "typescript": "7.0.2",
+    "wrangler": "4.135.0"
+  }
+}

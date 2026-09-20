@@ -59,6 +59,7 @@ public final class ApiRoutes {
         public static final String MARKETS = "/markets";
         public static final String PARSER_SOURCES = "/parser-sources";
         public static final String PARSER_JOBS = "/parser-jobs";
+        public static final String PARSER_SCHEDULER_RUN = "/parser-scheduler/run";
         public static final String REVIEW_CANDIDATES = "/review-candidates";
 
         private Admin() {

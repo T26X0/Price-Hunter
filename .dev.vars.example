@@ -1,0 +1,5 @@
+# Локальный пример. Скопируйте в .dev.vars и никогда не коммитьте реальные значения.
+DB_URL="jdbc:postgresql://localhost:5432/price_hunter"
+DB_USERNAME="price_hunter"
+DB_PASSWORD="local_dev_only"
+ADMIN_API_TOKEN="replace-with-at-least-32-random-bytes"

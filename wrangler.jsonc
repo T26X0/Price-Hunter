@@ -1,0 +1,44 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "price-hunter-api",
+  "main": "cloudflare/src/index.ts",
+  "compatibility_date": "2026-09-20",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "api.pricehunter.space",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "CORS_ALLOWED_ORIGINS": "https://pricehunter.space,https://www.pricehunter.space"
+  },
+  "triggers": {
+    "crons": ["15 2 * * *"]
+  },
+  "containers": [
+    {
+      "class_name": "PriceHunterContainer",
+      "image": "./Dockerfile",
+      "instance_type": "basic",
+      "max_instances": 1,
+      "constraints": {
+        "regions": ["EEUR", "WEUR"]
+      }
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "PRICE_HUNTER_CONTAINER",
+        "class_name": "PriceHunterContainer"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["PriceHunterContainer"]
+    }
+  ]
+}

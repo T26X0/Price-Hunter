@@ -2,6 +2,7 @@ package com.pricehunter.admin;
 
 import com.pricehunter.shared.ApiRoutes;
 import com.pricehunter.shared.SliceResponse;
+import com.pricehunter.parser.ParserDueWorkService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -32,6 +33,7 @@ public class AdminController {
 
     private final AdminConfigurationService adminService;
     private final AdminReviewService reviewService;
+    private final ParserDueWorkService parserDueWorkService;
 
     /** Создаёт город для будущих рынков и фильтров каталога. */
     @PostMapping(ApiRoutes.Admin.CITIES)
@@ -105,6 +107,14 @@ public class AdminController {
                                                       @RequestParam(defaultValue = "0") @Min(0) int page,
                                                       @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
         return adminService.findJobs(sourceId, page, size);
+    }
+
+    /** Выполняет один проход по просроченным источникам для внешнего production-планировщика. */
+    @PostMapping(ApiRoutes.Admin.PARSER_SCHEDULER_RUN)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Запустить плановый проход парсеров")
+    public void runScheduledParsers() {
+        parserDueWorkService.runDueWork();
     }
 
     /** Возвращает кандидатов, которые ожидают ручного решения или были обработаны ранее. */
