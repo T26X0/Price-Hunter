@@ -28,6 +28,16 @@ public class ParserJobLifecycleService {
         return jobRepository.save(new ParserJob(source, jobType, slot)).getId();
     }
 
+    /**
+     * Ставит ручной запуск без часового округления, поэтому оператор может безопасно повторить проверку
+     * источника после завершения предыдущего задания в тот же час.
+     */
+    @Transactional
+    public UUID queueManual(UUID sourceId, ParserJobType jobType, Instant scheduledAt) {
+        ParserSource source = sourceRepository.findById(sourceId).orElseThrow();
+        return jobRepository.save(new ParserJob(source, jobType, scheduledAt)).getId();
+    }
+
     /** Запускает задание под блокировкой и создаёт общий {@code CollectionRun} для ценового рынка. */
     @Transactional
     public void start(UUID jobId, Instant startedAt) {

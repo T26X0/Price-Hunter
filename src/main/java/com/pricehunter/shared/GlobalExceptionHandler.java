@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import jakarta.validation.ConstraintViolationException;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -35,6 +36,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     ResponseEntity<ApiError> handleConflict(ConflictException exception) {
         return response(HttpStatus.CONFLICT, exception.getMessage(), Map.of());
+    }
+
+    /** Возвращает 404, когда публичный ресурс отсутствует. */
+    @ExceptionHandler(NotFoundException.class)
+    ResponseEntity<ApiError> handleNotFound(NotFoundException exception) {
+        return response(HttpStatus.NOT_FOUND, exception.getMessage(), Map.of());
+    }
+
+    /** Возвращает 400 для некорректных параметров строки запроса и пути. */
+    @ExceptionHandler({ConstraintViolationException.class, IllegalArgumentException.class})
+    ResponseEntity<ApiError> handleBadRequest(RuntimeException exception) {
+        return response(HttpStatus.BAD_REQUEST, exception.getMessage(), Map.of());
     }
 
     /** Преобразует конфликт ограничения базы в нейтральный ответ 409. */

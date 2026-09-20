@@ -114,6 +114,11 @@ public class ParserSource {
         }
     }
 
+    /** Включает либо отключает источник без удаления его истории и настроек. */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     /** Заполняет даты создания и изменения перед первой записью сущности. */
     @PrePersist
     void assignTimestamps() {

@@ -1,0 +1,12 @@
+.git
+.idea
+.m2repo
+target
+node_modules
+frontend
+temporary-mock-api
+outputs
+*.log
+.env
+.env.*
+!/.env.production.example

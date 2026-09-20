@@ -19,6 +19,11 @@ public interface ParserSourceRepository extends JpaRepository<ParserSource, UUID
     @Query("select source from ParserSource source where source.id = :sourceId")
     Optional<ParserSource> findWithMarketById(@Param("sourceId") UUID sourceId);
 
+    /** Возвращает источники с рынком, городом и сетью без N+1 для административного списка. */
+    @EntityGraph(attributePaths = {"market", "market.city", "market.retailChain"})
+    @Query("select source from ParserSource source order by source.name, source.id")
+    Slice<ParserSource> findAllWithMarket(Pageable pageable);
+
     /** Ищет точный дубль конфигурации источника в рамках рынка. */
     Optional<ParserSource> findBySourceTypeAndConnectorKeyAndBaseUrlAndMarketId(
             ParserSourceType sourceType, String connectorKey, String baseUrl, UUID marketId);

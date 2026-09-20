@@ -17,7 +17,15 @@ server:
     include-message: never
 
 pricehunter:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
   parser:
     scheduling:
       enabled: ${PARSER_SCHEDULING_ENABLED:false}
       poll-cron: ${PARSER_POLL_CRON:0 15 * * * *}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha

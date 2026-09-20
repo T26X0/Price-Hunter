@@ -28,6 +28,17 @@ public class CatalogImportService {
      * @return идентификатор задания, по которому можно прочитать статистику
      */
     public UUID run(UUID sourceId, ParserJobType jobType, URI catalogUri, String cityKey, Instant observedAt) {
+        return execute(sourceId, jobType, catalogUri, cityKey, observedAt, false);
+    }
+
+    /** Выполняет ручной запуск с отдельной временной меткой задания, не конфликтующей с часовым планировщиком. */
+    public UUID runManually(UUID sourceId, ParserJobType jobType, URI catalogUri, String cityKey, Instant observedAt) {
+        return execute(sourceId, jobType, catalogUri, cityKey, observedAt, true);
+    }
+
+    /** Выполняет общий алгоритм каталога для планового либо ручного задания. */
+    private UUID execute(UUID sourceId, ParserJobType jobType, URI catalogUri, String cityKey,
+                         Instant observedAt, boolean manual) {
         if (jobType != ParserJobType.PRICE_REFRESH && jobType != ParserJobType.PRODUCT_DISCOVERY) {
             throw new IllegalArgumentException("Catalog import supports price or product jobs only");
         }
@@ -37,7 +48,9 @@ public class CatalogImportService {
         }
         verifySameOrigin(source.getBaseUrl(), catalogUri);
 
-        UUID jobId = lifecycleService.queue(sourceId, jobType, observedAt);
+        UUID jobId = manual
+                ? lifecycleService.queueManual(sourceId, jobType, observedAt)
+                : lifecycleService.queue(sourceId, jobType, observedAt);
         lifecycleService.start(jobId, observedAt);
         try {
             CatalogConnector connector = connectorRegistry.catalog(

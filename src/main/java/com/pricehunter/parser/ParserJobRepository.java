@@ -31,6 +31,9 @@ public interface ParserJobRepository extends JpaRepository<ParserJob, UUID> {
              order by job.scheduledAt, job.id
             """)
     Slice<ParserJob> findReady(@Param("now") Instant now, Pageable pageable);
+
+    /** Возвращает историю заданий источника, начиная с самого нового. */
+    Slice<ParserJob> findByParserSourceIdOrderByScheduledAtDescIdDesc(UUID parserSourceId, Pageable pageable);
 }
     /** Загружает задание с блокировкой строки, исключая одновременный переход статуса. */
     /** Возвращает порцию заданий, время запуска которых уже наступило. */

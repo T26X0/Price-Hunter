@@ -1,0 +1,55 @@
+# Production-стек: PostgreSQL и Spring Boot остаются внутри Docker-сети;
+# единственная внешняя точка входа — cloudflared, настроенный в Cloudflare Dashboard.
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-price_hunter}
+      POSTGRES_USER: ${POSTGRES_USER:-price_hunter}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
+    volumes:
+      - price-hunter-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - private
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-price_hunter}
+      DB_USERNAME: ${POSTGRES_USER:-price_hunter}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?Set exact frontend origins in .env.production}
+      PARSER_SCHEDULING_ENABLED: ${PARSER_SCHEDULING_ENABLED:-false}
+      PARSER_POLL_CRON: ${PARSER_POLL_CRON:-0 15 * * * *}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8080"
+    networks:
+      - private
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?Set CLOUDFLARE_TUNNEL_TOKEN in .env.production}
+    depends_on:
+      - app
+    networks:
+      - private
+
+networks:
+  private:
+    internal: true
+
+volumes:
+  price-hunter-postgres:

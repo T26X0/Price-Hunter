@@ -11,6 +11,9 @@ import java.util.UUID;
 /** Хранилище дополнительных условий предложения и их пакетного сопоставления. */
 public interface OfferTermRepository extends JpaRepository<OfferTerm, UUID> {
 
+    /** Возвращает все текущие активные условия, включая уже истёкшие, для корректной синхронизации снимка. */
+    List<OfferTerm> findByOfferIdAndActiveTrue(UUID offerId);
+
     @Query("""
             select t from OfferTerm t
              where t.offer.id = :offerId

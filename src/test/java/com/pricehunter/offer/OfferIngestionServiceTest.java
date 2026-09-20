@@ -32,6 +32,7 @@ class OfferIngestionServiceTest {
     @Mock ProductVariantRepository variantRepository;
     @Mock StoreRepository storeRepository;
     @Mock OfferStateHasher stateHasher;
+    @Mock OfferTermRepository offerTermRepository;
     @Mock Offer offer;
     @Mock OfferStateHistory openHistory;
 
@@ -40,7 +41,7 @@ class OfferIngestionServiceTest {
     @BeforeEach
     void setUp() {
         service = new OfferIngestionService(offerRepository, historyRepository,
-                marketRepository, variantRepository, storeRepository, stateHasher);
+                marketRepository, variantRepository, storeRepository, stateHasher, offerTermRepository);
     }
 
     @Test
@@ -59,6 +60,7 @@ class OfferIngestionServiceTest {
         assertThat(result).isEqualTo(new OfferUpsertResult(offerId, false, false));
         verify(historyRepository, never()).save(any());
         verify(historyRepository, never()).findOpenStateForUpdate(any());
+        verify(offerTermRepository, never()).findByOfferIdAndActiveTrue(any());
         verify(offer).refresh(snapshot.regularPrice(), snapshot.salePrice(), snapshot.conditionalPrice(),
                 snapshot.availabilityStatus(), snapshot.quantity(), snapshot.productUrl(),
                 snapshot.observedAt(), snapshot.freshUntil(), "same-hash");
@@ -81,6 +83,7 @@ class OfferIngestionServiceTest {
         assertThat(result).isEqualTo(new OfferUpsertResult(offerId, false, true));
         verify(openHistory).closeAt(snapshot.observedAt());
         verify(historyRepository).save(any(OfferStateHistory.class));
+        verify(offerTermRepository).findByOfferIdAndActiveTrue(offerId);
     }
 
     private static OfferSnapshot snapshot() {

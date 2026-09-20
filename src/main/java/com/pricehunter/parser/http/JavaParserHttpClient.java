@@ -4,7 +4,11 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -111,8 +115,8 @@ public class JavaParserHttpClient implements ParserHttpClient {
         }
     }
 
-    /** Блокирует локальные адреса и небезопасные формы URI до любого сетевого обращения. */
-    private static void validatePublicHttpsUri(URI uri) {
+    /** Блокирует локальные, private и link-local адреса до любого сетевого обращения. */
+    static void validatePublicHttpsUri(URI uri) {
         if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null || uri.getUserInfo() != null
                 || uri.getFragment() != null) {
             throw new IllegalArgumentException("Parser sources must use a public HTTPS URL");
@@ -122,6 +126,41 @@ public class JavaParserHttpClient implements ParserHttpClient {
                 || host.equals("0.0.0.0") || host.equals("::1")) {
             throw new IllegalArgumentException("Local addresses cannot be parser sources");
         }
+        try {
+            for (InetAddress address : InetAddress.getAllByName(host)) {
+                if (isPrivateOrReserved(address)) {
+                    throw new IllegalArgumentException("Private addresses cannot be parser sources");
+                }
+            }
+        } catch (UnknownHostException exception) {
+            throw new IllegalArgumentException("Parser source host cannot be resolved", exception);
+        }
+    }
+
+    /** Распознаёт диапазоны, которые не должны быть доступны парсеру из production-сети. */
+    private static boolean isPrivateOrReserved(InetAddress address) {
+        if (address.isAnyLocalAddress() || address.isLoopbackAddress() || address.isLinkLocalAddress()
+                || address.isSiteLocalAddress() || address.isMulticastAddress()) {
+            return true;
+        }
+        byte[] bytes = address.getAddress();
+        if (address instanceof Inet4Address) {
+            int first = Byte.toUnsignedInt(bytes[0]);
+            int second = Byte.toUnsignedInt(bytes[1]);
+            return first == 0
+                    || first == 10
+                    || first == 127
+                    || (first == 100 && second >= 64 && second <= 127)
+                    || (first == 169 && second == 254)
+                    || (first == 172 && second >= 16 && second <= 31)
+                    || (first == 192 && second == 168)
+                    || first >= 224;
+        }
+        if (address instanceof Inet6Address) {
+            int first = Byte.toUnsignedInt(bytes[0]);
+            return (first & 0xfe) == 0xfc;
+        }
+        return true;
     }
 
     /** Строит канонический origin, используемый как ключ кэша robots.txt. */
