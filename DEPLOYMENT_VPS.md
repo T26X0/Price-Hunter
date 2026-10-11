@@ -49,10 +49,16 @@ mvn package -DskipTests
 - `CLOUDFLARE_TUNNEL_TOKEN` — token созданного tunnel;
 - `PARSER_SCHEDULING_ENABLED=false` до первого ручного импорта.
 
-Стек запускается командой:
+Backend и PostgreSQL запускаются командой:
 
 ```bash
 docker compose --env-file .env.production -f compose.production.yaml up -d --build
+```
+
+После создания tunnel запускается его отдельный профиль:
+
+```bash
+docker compose --env-file .env.production -f compose.production.yaml --profile edge up -d
 ```
 
 ## Проверка после запуска

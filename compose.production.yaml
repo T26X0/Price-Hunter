@@ -62,7 +62,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?Set CLOUDFLARE_TUNNEL_TOKEN in .env.production}
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:-}
     depends_on:
       - app
     mem_limit: 64m
@@ -70,6 +70,8 @@ services:
       options:
         max-size: 5m
         max-file: "2"
+    profiles:
+      - edge
     networks:
       - private
 
