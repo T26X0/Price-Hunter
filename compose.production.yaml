@@ -1,5 +1,5 @@
 # Production-стек для бюджетного VPS: PostgreSQL не публикуется наружу,
-# а HTTPS-трафик приходит через Cloudflare Tunnel без открытых портов на сервере.
+# а Caddy на хосте принимает HTTPS и передаёт запросы только на loopback-порт backend.
 services:
   postgres:
     image: postgres:17-alpine
@@ -49,8 +49,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    expose:
-      - "8080"
+    ports:
+      - "127.0.0.1:8080:8080"
     mem_limit: 480m
     logging:
       options:
@@ -59,26 +59,9 @@ services:
     networks:
       - private
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:-}
-    depends_on:
-      - app
-    mem_limit: 64m
-    logging:
-      options:
-        max-size: 5m
-        max-file: "2"
-    profiles:
-      - edge
-    networks:
-      - private
-
 networks:
   private:
-    # Приватность достигается отсутствием published ports. Сеть не internal,
-    # потому что parser обращается к сайтам магазинов, а cloudflared — к Cloudflare.
+    # PostgreSQL не имеет published ports; backend доступен хосту только через loopback.
 
 volumes:
   price-hunter-postgres:

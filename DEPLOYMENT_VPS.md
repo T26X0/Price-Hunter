@@ -1,6 +1,6 @@
 # Production-развёртывание Price Hunter на VPS REG.RU
 
-Этот контур рассчитан на сервер `Std C1-M1-D10` с 1 ГБ RAM и 10 ГБ диска. Он предназначен для первого запуска: одно Spring Boot API, PostgreSQL, один последовательный парсер и Cloudflare Tunnel. Сервер не открывает наружу ни PostgreSQL, ни порт приложения.
+Этот контур рассчитан на сервер `Std C1-M1-D10` с 1 ГБ RAM и 10 ГБ диска. Он предназначен для первого запуска: одно Spring Boot API, PostgreSQL, один последовательный парсер и Caddy для HTTPS. Сервер не открывает наружу PostgreSQL или порт приложения.
 
 ## Что уже оптимизировано
 
@@ -9,27 +9,25 @@
 - backend ограничен 480 МБ контейнерной памяти и 320 МБ Java heap;
 - Docker-логи ротируются и занимают максимум 10 МБ на сервис;
 - `/api/admin/**` требует отдельный bearer-токен;
-- Cloudflare Tunnel даёт HTTPS и не требует открывать входящие порты сервера.
+- Caddy принимает HTTPS и передаёт запросы backend только на loopback-интерфейсе.
 
-## Подготовка домена и туннеля
+## Подготовка домена
 
-В Cloudflare должен быть активен домен `pricehunter.space`: его nameserver-ы должны быть установлены у REG.RU. Затем в Cloudflare Zero Trust создаётся один tunnel `price-hunter-vps` типа **Cloudflared**.
-
-Для tunnel добавляется public hostname:
+В REG.RU для `pricehunter.space` указываются DNS-серверы `ns1.reg.ru` и `ns2.reg.ru`. В зоне добавляется A-запись:
 
 | Поле | Значение |
 | --- | --- |
-| Hostname | `api.pricehunter.space` |
-| Service type | `HTTP` |
-| URL | `http://app:8080` |
+| Subdomain | `api` |
+| Type | `A` |
+| IP address | публичный IP VPS |
 
-Cloudflare выдаёт tunnel token. Он является секретом и записывается только на VPS в `.env.production`.
+После появления DNS-записи Caddy автоматически получает и обновляет TLS-сертификат для `api.pricehunter.space`.
 
 ## Подготовка сервера
 
 Используется Ubuntu 24.04. После получения IP-адреса на сервере устанавливаются Docker Engine и Docker Compose plugin. Для запуска нужен каталог `/opt/price-hunter`, доступный только пользователю, который управляет развёртыванием.
 
-Не открывайте в firewall порты `5432` и `8080`: tunnel подключается к Cloudflare изнутри сервера.
+В firewall разрешаются только `22`, `80` и `443`. Порты `5432` и `8080` остаются закрытыми.
 
 ## Сборка и доставка
 
@@ -46,19 +44,12 @@ mvn package -DskipTests
 - `POSTGRES_PASSWORD` — отдельный длинный случайный пароль;
 - `ADMIN_API_TOKEN` — отдельный случайный токен не короче 32 байт;
 - `CORS_ALLOWED_ORIGINS` — домены реального frontend, например `https://pricehunter.space,https://www.pricehunter.space`;
-- `CLOUDFLARE_TUNNEL_TOKEN` — token созданного tunnel;
 - `PARSER_SCHEDULING_ENABLED=false` до первого ручного импорта.
 
 Backend и PostgreSQL запускаются командой:
 
 ```bash
 docker compose --env-file .env.production -f compose.production.yaml up -d --build
-```
-
-После создания tunnel запускается его отдельный профиль:
-
-```bash
-docker compose --env-file .env.production -f compose.production.yaml --profile edge up -d
 ```
 
 ## Проверка после запуска
