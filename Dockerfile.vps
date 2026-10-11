@@ -1,0 +1,15 @@
+# syntax=docker/dockerfile:1
+
+# Лёгкий runtime-образ для VPS с 1 ГБ RAM: JAR собирается на рабочей машине
+# до загрузки на сервер, поэтому на VPS не запускаются Maven и компиляция Java.
+FROM eclipse-temurin:21-jre-jammy
+RUN groupadd --system pricehunter && useradd --system --gid pricehunter --create-home pricehunter
+WORKDIR /app
+
+COPY target/price-hunter-0.0.1-SNAPSHOT.jar /app/app.jar
+RUN chown pricehunter:pricehunter /app/app.jar
+USER pricehunter
+EXPOSE 8080
+
+# Лимит heap оставляет место PostgreSQL, cloudflared и ядру на бюджетном сервере.
+ENTRYPOINT ["java", "-Xms128m", "-Xmx320m", "-XX:MaxMetaspaceSize=128m", "-XX:+ExitOnOutOfMemoryError", "-jar", "/app/app.jar"]

@@ -1,5 +1,5 @@
-# Production-стек: PostgreSQL и Spring Boot остаются внутри Docker-сети;
-# единственная внешняя точка входа — cloudflared, настроенный в Cloudflare Dashboard.
+# Production-стек для бюджетного VPS: PostgreSQL не публикуется наружу,
+# а HTTPS-трафик приходит через Cloudflare Tunnel без открытых портов на сервере.
 services:
   postgres:
     image: postgres:17-alpine
@@ -15,19 +15,35 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    command:
+      - postgres
+      - -c
+      - shared_buffers=64MB
+      - -c
+      - work_mem=2MB
+      - -c
+      - maintenance_work_mem=32MB
+      - -c
+      - max_connections=20
+    mem_limit: 256m
+    logging:
+      options:
+        max-size: 5m
+        max-file: "2"
     networks:
       - private
 
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.vps
     restart: unless-stopped
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-price_hunter}
       DB_USERNAME: ${POSTGRES_USER:-price_hunter}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?Set exact frontend origins in .env.production}
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?Set ADMIN_API_TOKEN in .env.production}
       PARSER_SCHEDULING_ENABLED: ${PARSER_SCHEDULING_ENABLED:-false}
       PARSER_POLL_CRON: ${PARSER_POLL_CRON:-0 15 * * * *}
     depends_on:
@@ -35,6 +51,11 @@ services:
         condition: service_healthy
     expose:
       - "8080"
+    mem_limit: 480m
+    logging:
+      options:
+        max-size: 5m
+        max-file: "2"
     networks:
       - private
 
@@ -44,12 +65,18 @@ services:
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?Set CLOUDFLARE_TUNNEL_TOKEN in .env.production}
     depends_on:
       - app
+    mem_limit: 64m
+    logging:
+      options:
+        max-size: 5m
+        max-file: "2"
     networks:
       - private
 
 networks:
   private:
-    internal: true
+    # Приватность достигается отсутствием published ports. Сеть не internal,
+    # потому что parser обращается к сайтам магазинов, а cloudflared — к Cloudflare.
 
 volumes:
   price-hunter-postgres:

@@ -1,7 +1,6 @@
 .git
 .idea
 .m2repo
-target
 node_modules
 frontend
 temporary-mock-api
